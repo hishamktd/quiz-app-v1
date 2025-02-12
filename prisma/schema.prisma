@@ -1,0 +1,48 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:./dev.db"
+}
+
+model User {
+    id                   String       @id @default(cuid())
+    name                 String
+    email                String       @unique
+    createdAt            DateTime     @default(now())
+    updatedAt            DateTime     @updatedAt
+    contributedQuestions Question[]   @relation("ContributedQuestions")
+    answeredQuestions    UserAnswer[]
+}
+
+model Question {
+    id        String       @id @default(cuid())
+    text      String
+    options   Option[]
+    createdAt DateTime     @default(now())
+    updatedAt DateTime     @updatedAt
+    authorId  String
+    author    User         @relation("ContributedQuestions", fields: [authorId], references: [id])
+    answers   UserAnswer[]
+}
+
+model Option {
+    id         String   @id @default(cuid())
+    text       String
+    isCorrect  Boolean  @default(false)
+    questionId String
+    question   Question @relation(fields: [questionId], references: [id])
+}
+
+model UserAnswer {
+    id         String   @id @default(cuid())
+    userId     String
+    questionId String
+    optionId   String
+    isCorrect  Boolean
+    createdAt  DateTime @default(now())
+    user       User     @relation(fields: [userId], references: [id])
+    question   Question @relation(fields: [questionId], references: [id])
+}
